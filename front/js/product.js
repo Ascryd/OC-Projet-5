@@ -4,8 +4,10 @@ let price = document.getElementById("price")
 let description = document.getElementById("description")
 let color = document.getElementById("colors")
 
+let url_product = window.location.search.slice(1)
 
-fetch("http://localhost:3000/api/products/107fb5b75607497b96722bda5b504926")
+
+fetch(`http://localhost:3000/api/products/${url_product}`)
     .then(function(response) {
         if (response.ok) {
             return response.json();
@@ -15,7 +17,7 @@ fetch("http://localhost:3000/api/products/107fb5b75607497b96722bda5b504926")
     })
 
     .then (function(data) {
-
+        
         let img = document.createElement("img")
         img.src = data.imageUrl
         img.alt = data.altTxt
@@ -35,5 +37,32 @@ fetch("http://localhost:3000/api/products/107fb5b75607497b96722bda5b504926")
     })
 
     .catch(function(error) {
-        console.log (erreur);
+        console.log (erreur)
     })
+
+
+//---- panier ----- 
+
+let choixColor = color.value
+// console.log(img)
+
+const btn_ajoutPanier = document.getElementById("addToCart")
+btn_ajoutPanier.addEventListener("click", (e)=> {
+    let detailsProduits = {
+        photo_produit: image,
+        nom_produit: name,
+        prix_produit: price,
+        // quantite_produit: quantite,
+        // couleur_produit: choixColor
+    }
+    console.log(detailsProduits)
+})    
+
+
+// const quantity = document.getElementById("quantity")
+// quantite.addEventListener("input", (e)=> {
+//  let quantite = e
+// })
+
+
+
