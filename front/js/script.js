@@ -1,6 +1,9 @@
+//------------ Variables du squelette HTML ------------//
 let article = document.getElementsByTagName("article");
 let items = document.getElementById("items");
 
+
+//------------ On récupère les données avec fetch ------------//
 fetch("http://localhost:3000/api/products")
         .then(function(response) {
             if (response.ok) {
@@ -8,9 +11,9 @@ fetch("http://localhost:3000/api/products")
             } else {
                 throw new Error (erreur);
             }
-
         })
 
+        //----- On crée dynamiquement l'acceuil -----//
         .then (function(data) {
             data.forEach(product => {
         
