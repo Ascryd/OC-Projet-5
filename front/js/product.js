@@ -63,7 +63,6 @@ fetch(`http://localhost:3000/api/products/${url_product}`)
                 localStorage.setItem("produit", JSON.stringify(ProduitsDansLocalStorage))
             } else {
                 ProduitsDansLocalStorage = []
-                console.log(ProduitsDansLocalStorage)
                 ProduitsDansLocalStorage.push(detailsProduits)
                 localStorage.setItem("produit", JSON.stringify(ProduitsDansLocalStorage))
             }
