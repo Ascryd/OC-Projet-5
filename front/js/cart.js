@@ -1,3 +1,6 @@
+//****************************** Remplissage du panier ******************************//
+
+
 //------------ On sélectionne l'élément parent pour les articles ------------//
 cart__items = document.querySelector("#cart__items")
 
@@ -14,8 +17,8 @@ let structurePanier = []
 for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
     let url_product = ProduitsDansLocalStorage[i].id_produit
 
-    //------------ On stock les id-produit ------------//
 
+    //------------ On récupère les données API de chaque produit individuellement ------------//
     fetch(`http://localhost:3000/api/products/${url_product}`)
     
     .then(function(response) {
@@ -27,6 +30,8 @@ for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
         }
     })
 
+
+    //------------ On injecte le produit dans le squelette HTML (pour chaques produits) ------------//
     .then(function(data) {
         structurePanier = structurePanier +
         `<article class="cart__item" data-id="${ProduitsDansLocalStorage[i].id_produit}">
@@ -41,42 +46,97 @@ for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
                 </div>
                 <div class="cart__item__content__settings">
                 <div class="cart__item__content__settings__quantity">
-                    <p>Qté : ${ProduitsDansLocalStorage[i].quantite_produit}</p>
-                    <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value=${ProduitsDansLocalStorage[i].quantite_produit}>
+                    <p> Qté : ${ProduitsDansLocalStorage[i].quantite_produit}</p>
+                    <input data-id="${ProduitsDansLocalStorage[i].id_produit}" data-color="${ProduitsDansLocalStorage[i].couleur_produit}" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value=${ProduitsDansLocalStorage[i].quantite_produit}>
                 </div>
                 <div class="cart__item__content__settings__delete">
-                    <p class="deleteItem">Supprimer</p>
+                    <p data-id="${ProduitsDansLocalStorage[i].id_produit}" data-color="${ProduitsDansLocalStorage[i].couleur_produit}" class="deleteItem">Supprimer</p>
                 </div>
                 </div>
             </div>
         </article>`
 
-        cart__items.innerHTML = structurePanier       
+        cart__items.innerHTML = structurePanier
     })
 
+
+    //------------ On écoute l'input pour changer la quantité et on défini les variables nécessaire au changement ------------//
+    .then (function() {
+        let inputQuantity = document.querySelectorAll(".itemQuantity")
+        inputQuantity.forEach(input => {
+            input.addEventListener("change", (e) => {
+                let id = e.target.getAttribute("data-id")
+                let color = e.target.getAttribute("data-color")
+                //--- On appelle la fonction avec les paramètres nécessaires ---//
+                changerQuantiteeProduit(id ,color, input)
+                
+            })
+        })
+    })
+
+
+    //------------ On écoute le btn supprimer et on défini les variables nécessaire à la suppression  ------------//
+    .then(function() {
+        let supprimer = document.querySelectorAll(".deleteItem");
+        supprimer.forEach(bouton => {
+            bouton.addEventListener("click", (e) => {
+            let id = e.target.getAttribute("data-id")
+            let color = e.target.getAttribute("data-color")
+            //--- On appelle la fonction avec les paramètres nécessaires ---//
+            supprimerProduit(id, color)
+            })
+        })
+    })
+
+
     .catch(function(error) {
-        console.log (erreur);
+       
     })
 }
 
 
-
-//------------ Bouton supprimer ------------//
-
-// sélectionner l'élément dans local storage --> supprimer du LS --> actualiser la page
-let supprimer = document.querySelectorAll(".deleteItem");
-// console.log(supprimer)
-        
-        // for (let x = 0; x < supprimer.length; x++){
- 
-        // }
-
-
-
-
+//------------ On défini une fonction pour modifier la quantité du produit voulu (dans le local storage et visuellement)  ------------//
+function changerQuantiteeProduit(id, color, input){
+    for (let q = 0; q < ProduitsDansLocalStorage.length; q++) {
+        if ((ProduitsDansLocalStorage[q].id_produit == id) && (ProduitsDansLocalStorage[q].couleur_produit == color)) {
+            ProduitsDansLocalStorage[q].quantite_produit = input.value
+            localStorage.setItem("produit", JSON.stringify(ProduitsDansLocalStorage))
+            window.location.reload()
+        } else {
+            console.log("nop")
+        }
+    }
+}
 
 
-//*********************** Formulaire de contact *********************************//
+//------------ On défini une fonction pour supprimer le produit voulu du panier (et du local storage)  ------------//
+function supprimerProduit(id, color){
+    for (let e = 0; e < ProduitsDansLocalStorage.length; e++) {
+        if ((ProduitsDansLocalStorage[e].id_produit == id) && (ProduitsDansLocalStorage[e].couleur_produit == color)) {
+           ArrayProduit = JSON.parse(localStorage.getItem("produit"))
+           ArrayProduit.splice([e], 1)
+           localStorage.setItem("produit", JSON.stringify(ArrayProduit))
+           window.location.reload()
+        } 
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//*********************** Formulaire de contact et envoie à l'API *********************************//
 
 
 //------------ récup formulaire complet ------------//
@@ -98,16 +158,16 @@ let ville_erreur = document.querySelector("#cityErrorMsg")
 let email_erreur = document.querySelector("#emailErrorMsg")
 
 
-//------------ Un addE-Listener pour valider le formulaire  ------------//
+//------------ Un add E-Listener pour valider le formulaire  ------------//
 form.addEventListener("submit", (e)=> {
     
     e.preventDefault();
-    //------- Les données qu'on récup du formulaire -------//
-    let form_complet = {
-    prenom: prenom.value,
-    nom: nom.value,
-    adresse: adresse.value,
-    ville: ville.value,
+    //------- Les données qu'on récupère du formulaire -------//
+    let contact = {
+    firstName: prenom.value,
+    lastName: nom.value,
+    address: adresse.value,
+    city: ville.value,
     email: email.value
     }
     
@@ -162,35 +222,59 @@ form.addEventListener("submit", (e)=> {
         }
     }
 
+
     //------- La condition qui est rempli si les 5 fonctions ci-dessus sont "true" -------//
     if(prenom_controle() && nom_controle() && adresse_controle() && ville_controle() && email_controle()){
-       localStorage.setItem("contact", JSON.stringify(form_complet)) 
+       localStorage.setItem("formulaire", JSON.stringify(contact)) 
     } else {
         console.log("non")
     }
     
-    //------- Toutes les données qu'on va envoyer au serveur -------//
+
+    //------- On récupère les Id produit à envoyer -------//
+    let Array_Id = []
+    ProduitsDansLocalStorage.forEach(product => {
+        Array_Id.push(product.id_produit) 
+    })
+
+
+    //------- On met toutes les données qu'on va envoyer au serveur dans un objet-------//
     let donneeTotal = {
-        form_complet,
-        ProduitsDansLocalStorage
+        contact,
+        Array_Id
     }
+
+
+    //------- On envoie les données à l'API -------//
+    fetch("http://localhost:3000/api/products/order", {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(donneeTotal)
+
+    })
+
+    .then(function(response) {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error ("Données non envoyés");
+        }
+    })
+
+
+    //--- Si tout est ok, on redirige vers la page de confirmation ---//
+    .then(function() {
+        window.location.href="../html/confirmation.html"
+
+    }) 
     
-    
-    
-    // fetch("http://localhost:3000/api/order", {
-    //     method: "POST",
-    //     headers: {
-    //         "Accept": "application/json",
-    //         "Content-Type": "application/json"
-    //     },
-    //     body: JSON.stringify(donneeTotal)
-    // })
+
+    .catch(function(erreur) {
+        window.location.href="../html/confirmation.html"
+        console.log (erreur)
+    })
+
 })
-
-// let produit = JSON.parse(localStorage.getItem("produit"))
-// for (let p = 0; p < produit.length; p++) {
-//     let id = produit[p].id_produit
-//     return ("id")
-// }
-
-// console.log(id)

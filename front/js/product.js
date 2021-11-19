@@ -6,7 +6,7 @@ let description = document.getElementById("description")
 let color = document.getElementById("colors")
 
 
-//------------ Variables de l'url pour fetch ------------//
+//------------ Variable de l'url pour fetch ------------//
 let url_product = window.location.search.slice(1)
 
 
@@ -44,7 +44,7 @@ fetch(`http://localhost:3000/api/products/${url_product}`)
             let option = document.createElement("option")
             option.value = value
             option.innerText = value
-            color.appendChild(option)
+            -color.appendChild(option)
         })
         
         //----- On stock les caractéristiques du produit -----//
@@ -75,8 +75,3 @@ fetch(`http://localhost:3000/api/products/${url_product}`)
     })
 
 
-
-//------------ ?? ------------//
-
-
-//------------ ?? ------------//
