@@ -7,7 +7,7 @@ let color = document.getElementById("colors")
 
 
 //------------ Variable de l'url pour fetch ------------//
-let url_product = window.location.search.slice(1)
+let url_product = window.location.search.slice(1) // Mettre à jour URLsearchparams
 
 
 //------------ On écoute la quantité demandée et on récup sa valeur ------------//
@@ -44,7 +44,7 @@ fetch(`http://localhost:3000/api/products/${url_product}`)
             let option = document.createElement("option")
             option.value = value
             option.innerText = value
-            -color.appendChild(option)
+            color.appendChild(option)
         })
         
         //----- On stock les caractéristiques du produit -----//
@@ -57,8 +57,31 @@ fetch(`http://localhost:3000/api/products/${url_product}`)
             //----- On défini une variable pour le local storage -----//
             let ProduitsDansLocalStorage = JSON.parse(localStorage.getItem("produit"))
             
+
+            // Vérification anti double ligne
+            if (ProduitsDansLocalStorage) {
+
+                for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
+                    if ((detailsProduits.id_produit == ProduitsDansLocalStorage[i].id_produit) && (detailsProduits.couleur_produit == ProduitsDansLocalStorage[i].couleur_produit)) {
+
+                        //-------- Addition qtt de base + qtt ajouté -------//
+                        let storage_quantity = Number(ProduitsDansLocalStorage[i].quantite_produit)
+                        let details_quantity = Number(detailsProduits.quantite_produit)
+                        storage_quantity += details_quantity // Résultat de l'addition
+                        
+                        
+                        // ---------- le chiffre final a ajouter au LS ----------//
+                        detailsProduits.quantite_produit = storage_quantity
+                        ProduitsDansLocalStorage.splice([i], 1)                    
+                    }
+                }
+            }
+
+
+
+
             //----- On crée une boucle pour créer un array, ou ajouter un produit dans cet array -----//
-            if(ProduitsDansLocalStorage) {
+            if ((ProduitsDansLocalStorage) && ((detailsProduits.id_produit != ProduitsDansLocalStorage.id_produit) && (detailsProduits.couleur_produit != ProduitsDansLocalStorage.couleur_produit))) {
                 ProduitsDansLocalStorage.push(detailsProduits)
                 localStorage.setItem("produit", JSON.stringify(ProduitsDansLocalStorage))
             } else {
@@ -67,11 +90,8 @@ fetch(`http://localhost:3000/api/products/${url_product}`)
                 localStorage.setItem("produit", JSON.stringify(ProduitsDansLocalStorage))
             }
         })    
-
     })
-
+    
     .catch(function(erreur) {
         console.log (erreur)
     })
-
-

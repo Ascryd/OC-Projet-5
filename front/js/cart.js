@@ -14,6 +14,8 @@ let structurePanier = []
 
 
 //------------ On crée une boucle pour ajouter chaque produit au panier ------------//
+let total = 0
+
 for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
     let url_product = ProduitsDansLocalStorage[i].id_produit
 
@@ -33,6 +35,9 @@ for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
 
     //------------ On injecte le produit dans le squelette HTML (pour chaques produits) ------------//
     .then(function(data) {
+        let prixUnitaire = data.price * ProduitsDansLocalStorage[i].quantite_produit
+        total += prixUnitaire
+
         structurePanier = structurePanier +
         `<article class="cart__item" data-id="${ProduitsDansLocalStorage[i].id_produit}">
             <div class="cart__item__img">
@@ -42,7 +47,7 @@ for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
                 <div class="cart__item__content__titlePrice">
                 <h2>${data.name}</h2>
                 <p>${ProduitsDansLocalStorage[i].couleur_produit}</p>
-                <p>${data.price} €</p>
+                <p class="prixTotalUnitaire" >${prixUnitaire} €</p>
                 </div>
                 <div class="cart__item__content__settings">
                 <div class="cart__item__content__settings__quantity">
@@ -56,6 +61,7 @@ for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
             </div>
         </article>`
 
+         
         cart__items.innerHTML = structurePanier
     })
 
@@ -89,10 +95,22 @@ for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
     })
 
 
+    .then(function() {
+        let totalArticle = 0
+        for (let a = 0; a < ProduitsDansLocalStorage.length; a++) {
+            totalArticle += Number(ProduitsDansLocalStorage[a].quantite_produit)
+        }
+        document.querySelector("#totalQuantity").innerText = totalArticle
+        document.querySelector("#totalPrice").innerText = total
+       
+    })
+
+
     .catch(function(error) {
        
     })
 }
+
 
 
 //------------ On défini une fonction pour modifier la quantité du produit voulu (dans le local storage et visuellement)  ------------//
@@ -102,8 +120,6 @@ function changerQuantiteeProduit(id, color, input){
             ProduitsDansLocalStorage[q].quantite_produit = input.value
             localStorage.setItem("produit", JSON.stringify(ProduitsDansLocalStorage))
             window.location.reload()
-        } else {
-            console.log("nop")
         }
     }
 }
@@ -141,7 +157,6 @@ function supprimerProduit(id, color){
 
 //------------ récup formulaire complet ------------//
 let form = document.querySelector(".cart__order__form")
-console.log(form.elements)
 
 //------------ Recup le label / l'input avec .value ------------//
 let prenom = document.querySelector("#firstName")
@@ -164,87 +179,63 @@ form.addEventListener("submit", (e)=> {
     e.preventDefault();
     //------- Les données qu'on récupère du formulaire -------//
     let contact = {
-    firstName: prenom.value,
-    lastName: nom.value,
-    address: adresse.value,
-    city: ville.value,
-    email: email.value
+        firstName: prenom.value,
+        lastName: nom.value,
+        address: adresse.value,
+        city: ville.value,
+        email: email.value
     }
     
     //------- 5 fonctions qui vérifient les données du formulaire grâce aux Regex -------//
     function prenom_controle(){
-        if(/^[a-z ,.'-]+$/i.test(prenom.value)){
-            prenom_erreur.innerText = ""
-            return true
-        }else {
-            prenom_erreur.innerText = "Prenom non valide"
-            return false
-        }
+        return /^[a-z ,.'-]+$/i.test(prenom.value)
     }
 
     function nom_controle(){
-        if(/^[a-z ,.'-]+$/i.test(nom.value)){
-            nom_erreur.innerText = ""
-            return true
-        }else {
-            nom_erreur.innerText = "Nom non valide"
-            return false
-        }
+        return /^[a-z ,.'-]+$/i.test(nom.value)
     }
 
     function adresse_controle(){
-        if(/^[a-zA-Z0-9\s,.'-]{3,}$/.test(adresse.value)){
-            adresse_erreur.innerText = ""
-            return true
-        }else {
-            adresse_erreur.innerText = "Adresse non valide"
-            return false
-        }
+        return /^[a-zA-Z0-9\s,.'-]{3,}$/.test(adresse.value)
     }
 
     function ville_controle(){
-        if(/^[a-z ,.'-]+$/i.test(ville.value)){
-            ville_erreur.innerText = ""
-            return true
-        }else {
-            ville_erreur.innerText = "Ville non valide"
-            return false
-        }
+        return /^[a-z ,.'-]+$/i.test(ville.value)
     }
 
     function email_controle(){
-        if(/^[\w\-\+]+(\.[\w\-]+)*@[\w\-]+(\.[\w\-]+)*\.[\w\-]{2,4}$/.test(email.value)){
-            email_erreur.innerText = ""
-            return true
-        }else {
-            email_erreur.innerText = "Email non valide"
-            return false
-        }
+        return /^[\w\-\+]+(\.[\w\-]+)*@[\w\-]+(\.[\w\-]+)*\.[\w\-]{2,4}$/.test(email.value)
     }
+
+    prenom_erreur.innerText = prenom_controle() ? "" : "Prenom non valide"
+    nom_erreur.innerText = nom_controle() ? "" : "Nom non valide"
+    adresse_erreur.innerText = adresse_controle() ? "" : "Adresse non valide"
+    ville_erreur.innerText = ville_controle() ? "" : "Ville non valide"
+    email_erreur.innerText = email_controle() ? "" : "Email non valide"
+
 
 
     //------- La condition qui est rempli si les 5 fonctions ci-dessus sont "true" -------//
     if(prenom_controle() && nom_controle() && adresse_controle() && ville_controle() && email_controle()){
        localStorage.setItem("formulaire", JSON.stringify(contact)) 
-    } else {
-        console.log("non")
     }
     
 
     //------- On récupère les Id produit à envoyer -------//
-    let Array_Id = []
+    let products = []
     ProduitsDansLocalStorage.forEach(product => {
-        Array_Id.push(product.id_produit) 
+        products.push(product.id_produit) 
     })
 
 
     //------- On met toutes les données qu'on va envoyer au serveur dans un objet-------//
     let donneeTotal = {
         contact,
-        Array_Id
+        products
     }
 
-
+    console.log(products)
+    
     //------- On envoie les données à l'API -------//
     fetch("http://localhost:3000/api/products/order", {
         method: "POST",
@@ -260,20 +251,19 @@ form.addEventListener("submit", (e)=> {
         if (response.ok) {
             return response.json();
         } else {
-            throw new Error ("Données non envoyés");
+            throw new Error ("Données non envoyées");
         }
     })
 
 
     //--- Si tout est ok, on redirige vers la page de confirmation ---//
-    .then(function() {
-        window.location.href="../html/confirmation.html"
+    .then(function(data) {
+        window.location.href="../html/confirmation.html?orderId=" + data.orderId
 
     }) 
     
 
     .catch(function(erreur) {
-        window.location.href="../html/confirmation.html"
         console.log (erreur)
     })
 
