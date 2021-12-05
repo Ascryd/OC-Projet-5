@@ -6,9 +6,10 @@ let description = document.getElementById("description")
 let color = document.getElementById("colors")
 
 
-//------------ Variable de l'url pour fetch ------------//
-let url_product = window.location.search.slice(1) // Mettre à jour URLsearchparams
-
+//------------ url pour fetch ------------//
+const queryString = window.location.search
+const urlParams = new URLSearchParams(queryString)
+const url_product = urlParams.get("idProduit")
 
 //------------ On écoute la quantité demandée et on récup sa valeur ------------//
 const quantity = document.getElementById("quantity")
@@ -93,5 +94,5 @@ fetch(`http://localhost:3000/api/products/${url_product}`)
     })
     
     .catch(function(erreur) {
-        console.log (erreur)
+        
     })

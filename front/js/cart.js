@@ -13,14 +13,16 @@ let ProduitsDansLocalStorage = JSON.parse(localStorage.getItem("produit"))
 let structurePanier = []
 
 
-//------------ On crée une boucle pour ajouter chaque produit au panier ------------//
+//------------------ On défini total pour le prix ---------------------//
 let total = 0
 
+
+//------------ On crée une boucle pour ajouter chaque produit au panier ------------//
 for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
     let url_product = ProduitsDansLocalStorage[i].id_produit
 
 
-    //------------ On récupère les données API de chaque produit individuellement ------------//
+    //------------ On récupère les données API de chaques produits individuellement ------------//
     fetch(`http://localhost:3000/api/products/${url_product}`)
     
     .then(function(response) {
@@ -94,7 +96,7 @@ for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
         })
     })
 
-
+    //---------------  -----------------//
     .then(function() {
         let totalArticle = 0
         for (let a = 0; a < ProduitsDansLocalStorage.length; a++) {
@@ -234,7 +236,6 @@ form.addEventListener("submit", (e)=> {
         products
     }
 
-    console.log(products)
     
     //------- On envoie les données à l'API -------//
     fetch("http://localhost:3000/api/products/order", {
@@ -264,7 +265,7 @@ form.addEventListener("submit", (e)=> {
     
 
     .catch(function(erreur) {
-        console.log (erreur)
+        
     })
 
 })

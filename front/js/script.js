@@ -19,7 +19,7 @@ fetch("http://localhost:3000/api/products")
         
                 let link = document.createElement("a")
                 link.innerText = product.name
-                link.href = "./product.html?" + product._id
+                link.href = "./product.html?idProduit=" + product._id
 
                 let img = document.createElement("img")
                 img.src = product.imageUrl
@@ -43,5 +43,5 @@ fetch("http://localhost:3000/api/products")
         })
 
         .catch(function(error) {
-            console.log (erreur);
+            
         })
