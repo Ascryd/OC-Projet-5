@@ -96,7 +96,7 @@ for (let i = 0; i < ProduitsDansLocalStorage.length; i++) {
         })
     })
 
-    //---------------  -----------------//
+    //--------------- Les quantitées totals -----------------//
     .then(function() {
         let totalArticle = 0
         for (let a = 0; a < ProduitsDansLocalStorage.length; a++) {
@@ -218,9 +218,13 @@ form.addEventListener("submit", (e)=> {
 
 
     //------- La condition qui est rempli si les 5 fonctions ci-dessus sont "true" -------//
-    if(prenom_controle() && nom_controle() && adresse_controle() && ville_controle() && email_controle()){
-       localStorage.setItem("formulaire", JSON.stringify(contact)) 
+    function verif(){
+        if(prenom_controle() && nom_controle() && adresse_controle() && ville_controle() && email_controle()){
+        localStorage.setItem("formulaire", JSON.stringify(contact)) 
+        return true
+        }
     }
+    verif()
     
 
     //------- On récupère les Id produit à envoyer -------//
@@ -238,34 +242,38 @@ form.addEventListener("submit", (e)=> {
 
     
     //------- On envoie les données à l'API -------//
-    fetch("http://localhost:3000/api/products/order", {
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(donneeTotal)
 
-    })
-
-    .then(function(response) {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error ("Données non envoyées");
-        }
-    })
-
-
-    //--- Si tout est ok, on redirige vers la page de confirmation ---//
-    .then(function(data) {
-        window.location.href="../html/confirmation.html?orderId=" + data.orderId
-
-    }) 
+    if (verif() === true) {
+        fetch("http://localhost:3000/api/products/order", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(donneeTotal)
     
-
-    .catch(function(erreur) {
+        })
+    
+        .then(function(response) {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error ("Données non envoyées");
+            }
+        })
+    
+    
+        //--- Si tout est ok, on redirige vers la page de confirmation ---//
+        .then(function(data) {
+            window.location.href="../html/confirmation.html?orderId=" + data.orderId
+    
+        }) 
         
-    })
+    
+        .catch(function(erreur) {
+            
+        })
+
+    }
 
 })
